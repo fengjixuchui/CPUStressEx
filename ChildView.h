@@ -34,7 +34,7 @@ private:
 
 	void CreateThreads();
 	std::unique_ptr<CThread> CreateThread();
-	void AddThread(const CThread* thread);
+	void AddThread(std::unique_ptr<CThread>& thread);
 	static PCWSTR ActivityLevelToString(ActivityLevel level);
 	static PCWSTR ThreadPriorityToString(int priority);
 
@@ -55,5 +55,10 @@ protected:
 	afx_msg void OnUpdateThreadDeactivate(CCmdUI *pCmdUI);
 	void OnChangeThreadActivity(UINT id);
 	void OnUpdateChangeThreadActivity(CCmdUI* pCmdUI);
+public:
+	afx_msg void OnProcessCreatethread();
+	afx_msg void OnUpdateProcessCreatethread(CCmdUI *pCmdUI);
+	afx_msg void OnProcessCreate4threads();
+	afx_msg void OnUpdateProcessCreate4threads(CCmdUI *pCmdUI);
 };
 

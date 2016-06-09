@@ -187,6 +187,8 @@
   <ItemGroup>
     <ClInclude Include="ChildView.h" />
     <ClInclude Include="CPUStressEx.h" />
+    <ClInclude Include="Globals.h" />
+    <ClInclude Include="MainDialogBar.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -197,6 +199,8 @@
   <ItemGroup>
     <ClCompile Include="ChildView.cpp" />
     <ClCompile Include="CPUStressEx.cpp" />
+    <ClCompile Include="Globals.cpp" />
+    <ClCompile Include="MainDialogBar.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -214,8 +218,10 @@
     <None Include="res\CPUStressEx.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Icons\gear_delete.ico" />
+    <Image Include="Icons\gear_pause.ico" />
+    <Image Include="Icons\gear_run.ico" />
     <Image Include="res\CPUStressEx.ico" />
-    <Image Include="res\Toolbar.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

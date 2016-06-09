@@ -23,8 +23,7 @@ END_MESSAGE_MAP()
 
 // CCPUStressExApp construction
 
-CCPUStressExApp::CCPUStressExApp()
-{
+CCPUStressExApp::CCPUStressExApp() {
 	// TODO: replace application ID string below with unique ID string; recommended
 	// format for string is CompanyName.ProductName.SubProduct.VersionInformation
 	SetAppID(_T("CPUStressEx.AppID.NoVersion"));
@@ -40,8 +39,9 @@ CCPUStressExApp theApp;
 
 // CCPUStressExApp initialization
 
-BOOL CCPUStressExApp::InitInstance()
-{
+BOOL CCPUStressExApp::InitInstance() {
+	::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
@@ -68,12 +68,11 @@ BOOL CCPUStressExApp::InitInstance()
 	// The one and only window has been initialized, so show and update it
 	pFrame->ShowWindow(SW_SHOW);
 	pFrame->UpdateWindow();
-	
+
 	return TRUE;
 }
 
-int CCPUStressExApp::ExitInstance()
-{
+int CCPUStressExApp::ExitInstance() {
 	//TODO: handle additional resources you may have added
 	return CWinApp::ExitInstance();
 }
@@ -83,12 +82,11 @@ int CCPUStressExApp::ExitInstance()
 
 // CAboutDlg dialog used for App About
 
-class CAboutDlg : public CDialogEx
-{
+class CAboutDlg : public CDialogEx {
 public:
 	CAboutDlg();
 
-// Dialog Data
+	// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
@@ -101,12 +99,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
-{
+CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX) {
 }
 
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
+void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialogEx::DoDataExchange(pDX);
 }
 
@@ -114,8 +110,7 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
 
 // App command to run the dialog
-void CCPUStressExApp::OnAppAbout()
-{
+void CCPUStressExApp::OnAppAbout() {
 	CAboutDlg aboutDlg;
 	aboutDlg.DoModal();
 }

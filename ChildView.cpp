@@ -32,6 +32,10 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_COMMAND_RANGE(ID_ACTIVITYLEVEL_LOW, ID_ACTIVITYLEVEL_MAXIMUM, OnChangeThreadActivity)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTIVITYLEVEL_LOW, ID_ACTIVITYLEVEL_MAXIMUM, OnUpdateChangeThreadActivity)
 
+	ON_COMMAND(ID_PROCESS_CREATETHREAD, &CChildView::OnProcessCreatethread)
+	ON_UPDATE_COMMAND_UI(ID_PROCESS_CREATETHREAD, &CChildView::OnUpdateProcessCreatethread)
+	ON_COMMAND(ID_PROCESS_CREATE4THREADS, &CChildView::OnProcessCreate4threads)
+	ON_UPDATE_COMMAND_UI(ID_PROCESS_CREATE4THREADS, &CChildView::OnUpdateProcessCreate4threads)
 END_MESSAGE_MAP()
 
 void CChildView::DoDataExchange(CDataExchange* pDX) {
@@ -88,26 +92,33 @@ void CChildView::CreateThreads() {
 		auto thread = CreateThread();
 		if (i == 0)
 			thread->Resume();
-		AddThread(thread.get());
-		m_Threads.push_back(move(thread));
+		AddThread(thread);
 	}
 }
 
-void CChildView::AddThread(const CThread* thread) {
+void CChildView::AddThread(unique_ptr<CThread>& thread) {
 	CString number;
 	number.Format(L"%d", m_List.GetItemCount() + 1);
 	int n = m_List.InsertItem(m_List.GetItemCount(), number);
 	number.Format(L"%d", thread->GetThreadId());
 	m_List.SetItemText(n, 1, number);
-	UpdateThread(n, thread);
+	UpdateThread(n, thread.get());
+
+	m_Threads.push_back(move(thread));
 }
 
 void CChildView::UpdateThread(int n, const CThread* thread) {
 	if (thread == nullptr)
 		thread = reinterpret_cast<CThread*>(m_List.GetItemData(n));
+	CString str;
 	m_List.SetItemText(n, 2, thread->IsActive() ? L"Yes" : L"");
 	m_List.SetItemText(n, 3, ActivityLevelToString(thread->GetActivityLevel()));
 	m_List.SetItemText(n, 4, ThreadPriorityToString(thread->GetPriority()));
+	str.Format(L"%d", thread->GetIdealCPU());
+	m_List.SetItemText(n, 5, str);
+	WCHAR buffer[65];
+	_itow_s(thread->GetAffinity(), buffer, 2);
+	m_List.SetItemText(n, 6, buffer);
 
 	m_List.SetItemData(n, reinterpret_cast<DWORD_PTR>(thread));
 }
@@ -146,8 +157,6 @@ vector<pair<CThread*, int>> CChildView::GetSelectedThreads() const {
 	}
 	return selectedThreads;
 }
-
-
 
 void CChildView::OnThreadActivate() {
 	for (auto& item : GetSelectedThreads()) {
@@ -189,4 +198,26 @@ void CChildView::OnChangeThreadActivity(UINT id) {
 
 void CChildView::OnUpdateChangeThreadActivity(CCmdUI* pCmdUI) {
 	pCmdUI->Enable(m_List.GetSelectedCount() > 0);
+}
+
+
+void CChildView::OnProcessCreatethread() {
+	AddThread(CreateThread());
+}
+
+
+void CChildView::OnUpdateProcessCreatethread(CCmdUI *pCmdUI) {
+	pCmdUI->Enable(m_Threads.size() < 64);
+}
+
+
+void CChildView::OnProcessCreate4threads() {
+	for (int i = 0; i < 4; i++) {
+		AddThread(CreateThread());
+	}
+}
+
+
+void CChildView::OnUpdateProcessCreate4threads(CCmdUI *pCmdUI) {
+	pCmdUI->Enable(m_Threads.size() < 60);
 }

@@ -35,6 +35,12 @@ public:
 		::SetThreadPriority(m_hThread, priority);
 	}
 	
+	void SetAfinity(DWORD_PTR affinity);
+	DWORD_PTR GetAffinity() const;
+
+	void SetIdealCPU(int n);
+	int GetIdealCPU() const;
+
 	void Terminate();
 	void Suspend();
 	void Resume();
@@ -50,6 +56,7 @@ private:
 	DWORD m_ID;
 	ActivityLevel m_ActivityLevel = ActivityLevel::Low;
 	bool m_Active = false;
+	DWORD m_Affinity;
 };
 
 
