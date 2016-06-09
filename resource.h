@@ -9,9 +9,8 @@
 #define ID_THREAD_ACTIVITYLEVEL         32772
 #define ID_ACTIVITYLEVEL_LOW            32773
 #define ID_ACTIVITYLEVEL_MEDIUM         32774
-#define ID_ACTIVITYLEVEL_HIGH           32775
+#define ID_ACTIVITYLEVEL_BUSY           32775
 #define ID_ACTIVITYLEVEL_MAXIMUM        32776
-#define ID_ACTIVITYLEVEL_BUSY           32777
 #define ID_THREAD_AFFINITY              32778
 #define ID_THREAD_IDEALCPU              32779
 #define ID_THREAD_KILL                  32780

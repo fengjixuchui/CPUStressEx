@@ -15,10 +15,9 @@ using namespace std;
 
 // CChildView
 
-CChildView::CChildView() {}
+CChildView::CChildView() : m_List(m_Threads) {}
 
 CChildView::~CChildView() {}
-
 
 BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_WM_PAINT()
@@ -26,9 +25,20 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_WM_SIZE()
 	ON_COMMAND(ID_THREAD_ACTIVATE, &CChildView::OnThreadActivate)
 	ON_UPDATE_COMMAND_UI(ID_THREAD_ACTIVATE, &CChildView::OnUpdateThreadActivate)
+	ON_WM_ERASEBKGND()
+	ON_COMMAND(ID_THREAD_DEACTIVATE, &CChildView::OnThreadDeactivate)
+	ON_UPDATE_COMMAND_UI(ID_THREAD_DEACTIVATE, &CChildView::OnUpdateThreadDeactivate)
+
+	ON_COMMAND_RANGE(ID_ACTIVITYLEVEL_LOW, ID_ACTIVITYLEVEL_MAXIMUM, OnChangeThreadActivity)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTIVITYLEVEL_LOW, ID_ACTIVITYLEVEL_MAXIMUM, OnUpdateChangeThreadActivity)
+
 END_MESSAGE_MAP()
 
+void CChildView::DoDataExchange(CDataExchange* pDX) {
+	CWnd::DoDataExchange(pDX);
 
+	DDX_Control(pDX, IDC_LIST, m_List);
+}
 
 // CChildView message handlers
 
@@ -44,22 +54,21 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) {
 	return TRUE;
 }
 
-void CChildView::OnPaint() {
-	CPaintDC dc(this); // device context for painting
-
-	// TODO: Add your message handler code here
-
-	// Do not call CWnd::OnPaint() for painting messages
+void CChildView::OnCustomDraw(NMHDR* pHdr, LRESULT* pResult) {
+	auto draw = (NMLVCUSTOMDRAW*)pHdr;
+	draw->clrTextBk = RGB(255, 0, 0);
 }
 
-
+void CChildView::OnPaint() {
+	CPaintDC dc(this); // device context for painting
+}
 
 int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_List.Create(WS_CHILD | WS_VISIBLE | LVS_REPORT, CRect(), this, IDC_LIST);
-	m_List.SetExtendedStyle(LVS_EX_FULLROWSELECT);
+	m_List.Create(WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | LVS_REPORT | LVS_SHOWSELALWAYS, CRect(), this, IDC_LIST);
+	m_List.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_AUTOSIZECOLUMNS | LVS_EX_FLATSB);
 
 	m_List.InsertColumn(0, L"#", 0, 40);
 	m_List.InsertColumn(1, L"ID", LVCFMT_LEFT, 60);
@@ -67,7 +76,7 @@ int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	m_List.InsertColumn(3, L"Activity", LVCFMT_LEFT, 80);
 	m_List.InsertColumn(4, L"Priority", LVCFMT_LEFT, 80);
 	m_List.InsertColumn(5, L"Ideal CPU", LVCFMT_LEFT, 80);
-	m_List.InsertColumn(6, L"Affinity", LVCFMT_LEFT, 80);
+	m_List.InsertColumn(6, L"Affinity", LVCFMT_LEFT, 100);
 
 	CreateThreads();
 
@@ -117,7 +126,6 @@ PCWSTR CChildView::ThreadPriorityToString(int priority) {
 
 unique_ptr<CThread> CChildView::CreateThread() {
 	auto thread = make_unique<CThread>();
-
 	return thread;
 }
 
@@ -150,6 +158,35 @@ void CChildView::OnThreadActivate() {
 
 
 void CChildView::OnUpdateThreadActivate(CCmdUI *pCmdUI) {
-	auto threads = GetSelectedThreads();
-	pCmdUI->Enable(threads.size() > 0);
+	pCmdUI->Enable(m_List.GetSelectedCount() > 0);
+}
+
+
+BOOL CChildView::OnEraseBkgnd(CDC* pDC) {
+	return TRUE;
+}
+
+
+void CChildView::OnThreadDeactivate() {
+	for (auto& item : GetSelectedThreads()) {
+		item.first->Suspend();
+		UpdateThread(item.second, item.first);
+	}
+}
+
+void CChildView::OnUpdateThreadDeactivate(CCmdUI *pCmdUI) {
+	pCmdUI->Enable(m_List.GetSelectedCount() > 0);
+}
+
+void CChildView::OnChangeThreadActivity(UINT id) {
+	auto level = (ActivityLevel)(id - ID_ACTIVITYLEVEL_LOW + 1);
+
+	for (auto& item : GetSelectedThreads()) {
+		item.first->SetActivityLevel(level);
+		UpdateThread(item.second, item.first);
+	}
+}
+
+void CChildView::OnUpdateChangeThreadActivity(CCmdUI* pCmdUI) {
+	pCmdUI->Enable(m_List.GetSelectedCount() > 0);
 }

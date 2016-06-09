@@ -1,38 +1,35 @@
 
-// ChildView.h : interface of the CChildView class
-//
-
-
 #pragma once
 
 #include "Thread.h"
+#include "ThreadsListCtrl.h"
 
 // CChildView window
 
-class CChildView : public CWnd
-{
-// Construction
+class CChildView : public CWnd {
+	// Construction
 public:
 	CChildView();
 
-// Attributes
+	// Attributes
 public:
 
-	enum { IDC_LIST = 123 };
+	enum { IDC_LIST = 1234 };
 
-// Operations
+	// Operations
 public:
 
-// Overrides
-	protected:
+	// Overrides
+protected:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 // Implementation
 public:
 	virtual ~CChildView();
 
 private:
-	CMFCListCtrl m_List;
+	CThreadsListCtrl m_List;
 	std::vector < std::unique_ptr<CThread>> m_Threads;
 
 	void CreateThreads();
@@ -50,7 +47,13 @@ protected:
 	std::vector<std::pair<CThread*, int>> GetSelectedThreads() const;
 	void UpdateThread(int n, const CThread* thread = nullptr);
 
+	afx_msg void OnCustomDraw(NMHDR*, LRESULT*);
 	afx_msg void OnThreadActivate();
 	afx_msg void OnUpdateThreadActivate(CCmdUI *pCmdUI);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnThreadDeactivate();
+	afx_msg void OnUpdateThreadDeactivate(CCmdUI *pCmdUI);
+	void OnChangeThreadActivity(UINT id);
+	void OnUpdateChangeThreadActivity(CCmdUI* pCmdUI);
 };
 
