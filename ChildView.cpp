@@ -36,6 +36,8 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_UPDATE_COMMAND_UI(ID_PROCESS_CREATETHREAD, &CChildView::OnUpdateProcessCreatethread)
 	ON_COMMAND(ID_PROCESS_CREATE4THREADS, &CChildView::OnProcessCreate4threads)
 	ON_UPDATE_COMMAND_UI(ID_PROCESS_CREATE4THREADS, &CChildView::OnUpdateProcessCreate4threads)
+
+	ON_NOTIFY(NM_RCLICK, IDC_LIST, OnRClickList)
 END_MESSAGE_MAP()
 
 void CChildView::DoDataExchange(CDataExchange* pDX) {
@@ -47,7 +49,7 @@ void CChildView::DoDataExchange(CDataExchange* pDX) {
 // CChildView message handlers
 
 BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) {
-	if (!CWnd::PreCreateWindow(cs))
+	if(!CWnd::PreCreateWindow(cs))
 		return FALSE;
 
 	cs.dwExStyle |= WS_EX_CLIENTEDGE;
@@ -58,9 +60,15 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) {
 	return TRUE;
 }
 
-void CChildView::OnCustomDraw(NMHDR* pHdr, LRESULT* pResult) {
-	auto draw = (NMLVCUSTOMDRAW*)pHdr;
-	draw->clrTextBk = RGB(255, 0, 0);
+void CChildView::OnRClickList(NMHDR*, LRESULT*) {
+	CPoint pt;
+	::GetCursorPos(&pt);
+	CPoint screen(pt);
+	m_List.ScreenToClient(&pt);
+	int item = m_List.HitTest(pt);
+	CMenu menu;
+	menu.LoadMenu(IDR_CONTEXTMENU);
+	menu.GetSubMenu(item < 0 ? 1 : 0)->TrackPopupMenu(TPM_RIGHTBUTTON, screen.x, screen.y, this);
 }
 
 void CChildView::OnPaint() {
@@ -68,7 +76,7 @@ void CChildView::OnPaint() {
 }
 
 int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
-	if (CWnd::OnCreate(lpCreateStruct) == -1)
+	if(CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
 	m_List.Create(WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | LVS_REPORT | LVS_SHOWSELALWAYS, CRect(), this, IDC_LIST);
@@ -88,9 +96,9 @@ int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 }
 
 void CChildView::CreateThreads() {
-	for (int i = 0; i < 4; i++) {
+	for(int i = 0; i < 4; i++) {
 		auto thread = CreateThread();
-		if (i == 0)
+		if(i == 0)
 			thread->Resume();
 		AddThread(thread);
 	}
@@ -108,7 +116,7 @@ void CChildView::AddThread(unique_ptr<CThread>& thread) {
 }
 
 void CChildView::UpdateThread(int n, const CThread* thread) {
-	if (thread == nullptr)
+	if(thread == nullptr)
 		thread = reinterpret_cast<CThread*>(m_List.GetItemData(n));
 	CString str;
 	m_List.SetItemText(n, 2, thread->IsActive() ? L"Yes" : L"");
@@ -149,7 +157,7 @@ void CChildView::OnSize(UINT nType, int cx, int cy) {
 
 vector<pair<CThread*, int>> CChildView::GetSelectedThreads() const {
 	vector<pair<CThread*, int>> selectedThreads;
-	for (auto pos = m_List.GetFirstSelectedItemPosition(); pos; ) {
+	for(auto pos = m_List.GetFirstSelectedItemPosition(); pos; ) {
 		int n = m_List.GetNextSelectedItem(pos);
 		auto data = m_List.GetItemData(n);
 
@@ -159,7 +167,7 @@ vector<pair<CThread*, int>> CChildView::GetSelectedThreads() const {
 }
 
 void CChildView::OnThreadActivate() {
-	for (auto& item : GetSelectedThreads()) {
+	for(auto& item : GetSelectedThreads()) {
 		item.first->Resume();
 		UpdateThread(item.second, item.first);
 	}
@@ -177,7 +185,7 @@ BOOL CChildView::OnEraseBkgnd(CDC* pDC) {
 
 
 void CChildView::OnThreadDeactivate() {
-	for (auto& item : GetSelectedThreads()) {
+	for(auto& item : GetSelectedThreads()) {
 		item.first->Suspend();
 		UpdateThread(item.second, item.first);
 	}
@@ -190,7 +198,7 @@ void CChildView::OnUpdateThreadDeactivate(CCmdUI *pCmdUI) {
 void CChildView::OnChangeThreadActivity(UINT id) {
 	auto level = (ActivityLevel)(id - ID_ACTIVITYLEVEL_LOW + 1);
 
-	for (auto& item : GetSelectedThreads()) {
+	for(auto& item : GetSelectedThreads()) {
 		item.first->SetActivityLevel(level);
 		UpdateThread(item.second, item.first);
 	}
@@ -212,7 +220,7 @@ void CChildView::OnUpdateProcessCreatethread(CCmdUI *pCmdUI) {
 
 
 void CChildView::OnProcessCreate4threads() {
-	for (int i = 0; i < 4; i++) {
+	for(int i = 0; i < 4; i++) {
 		AddThread(CreateThread());
 	}
 }
@@ -221,3 +229,5 @@ void CChildView::OnProcessCreate4threads() {
 void CChildView::OnUpdateProcessCreate4threads(CCmdUI *pCmdUI) {
 	pCmdUI->Enable(m_Threads.size() < 60);
 }
+
+

@@ -31,19 +31,21 @@ CMainFrame::CMainFrame() {
 CMainFrame::~CMainFrame() {}
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
-	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
+	if(CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
 	// create a view to occupy the client area of the frame
-	if (!m_wndView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW, CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL)) {
+	if(!m_wndView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW, CRect(), this, AFX_IDW_PANE_FIRST)) {
 		TRACE0("Failed to create view window\n");
 		return -1;
 	}
 
-	if (!m_wndDlgBar.Create(this, IDR_MAINFRAME, CBRS_ALIGN_TOP, AFX_IDW_DIALOGBAR)) {
+	if(!m_wndDlgBar.Create(this, IDR_MAINFRAME, CBRS_ALIGN_TOP, AFX_IDW_DIALOGBAR)) {
 		TRACE0("Failed to create dialogbar\n");
-		return -1;		// fail to create
+		return -1;
 	}
+
+	// main icon window
 
 	SetIcon(AfxGetApp()->LoadIcon(IDR_MAINFRAME), TRUE);
 	SetIcon(AfxGetApp()->LoadIcon(IDR_MAINFRAME), FALSE);
@@ -52,10 +54,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 }
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs) {
-	if (!CFrameWnd::PreCreateWindow(cs))
+	if(!CFrameWnd::PreCreateWindow(cs))
 		return FALSE;
-	// TODO: Modify the Window class or styles here by modifying
-	//  the CREATESTRUCT cs
 
 	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 	cs.lpszClass = AfxRegisterWndClass(0);
@@ -84,14 +84,14 @@ void CMainFrame::OnSetFocus(CWnd* /*pOldWnd*/) {
 
 BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) {
 	// let the view have first crack at the command
-	if (m_wndView.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+
+	if(m_wndView.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
 		return TRUE;
 
 	// otherwise, do default handling
+
 	return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
 }
-
-
 
 void CMainFrame::OnOptionsAlwaysontop() {
 	bool onTop = (GetExStyle() & WS_EX_TOPMOST) > 0;

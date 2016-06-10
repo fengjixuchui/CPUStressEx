@@ -53,9 +53,10 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnThreadDeactivate();
 	afx_msg void OnUpdateThreadDeactivate(CCmdUI *pCmdUI);
+	void OnRClickList(NMHDR*, LRESULT*);
+
 	void OnChangeThreadActivity(UINT id);
 	void OnUpdateChangeThreadActivity(CCmdUI* pCmdUI);
-public:
 	afx_msg void OnProcessCreatethread();
 	afx_msg void OnUpdateProcessCreatethread(CCmdUI *pCmdUI);
 	afx_msg void OnProcessCreate4threads();

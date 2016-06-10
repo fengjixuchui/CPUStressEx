@@ -4,7 +4,6 @@
 
 #pragma once
 #include "ChildView.h"
-#include "MainDialogBar.h"
 
 class CMainFrame : public CFrameWnd {
 
@@ -33,8 +32,8 @@ public:
 #endif
 
 protected:  // control bar embedded members
-	CMainDialogBar    m_wndDlgBar;
-	CChildView    m_wndView;
+	CDialogBar  m_wndDlgBar;
+	CChildView	m_wndView;
 
 	// Generated message map functions
 protected:

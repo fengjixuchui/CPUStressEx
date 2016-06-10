@@ -4,30 +4,24 @@
 #include "stdafx.h"
 #include "CPUStressEx.h"
 #include "MainDialogBar.h"
-
+#include "ChildView.h"
 
 // CMainDialogBar
 
 IMPLEMENT_DYNAMIC(CMainDialogBar, CDialogBar)
 
-CMainDialogBar::CMainDialogBar() 
-{
-
+CMainDialogBar::CMainDialogBar() {
 }
 
-CMainDialogBar::~CMainDialogBar()
-{
+CMainDialogBar::~CMainDialogBar() {
 }
 
 
 BEGIN_MESSAGE_MAP(CMainDialogBar, CDialogBar)
 	ON_WM_CREATE()
+	ON_COMMAND_RANGE(ID_ACTIVITYLEVEL_LOW, ID_ACTIVITYLEVEL_MAXIMUM, OnSetActivityLevel)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTIVITYLEVEL_LOW, ID_ACTIVITYLEVEL_MAXIMUM, OnUpdateSetActivityLevel)
 END_MESSAGE_MAP()
-
-void CMainDialogBar::DoDataExchange(CDataExchange* pDX) {
-	CDialogBar::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_THREAD_ACTIVITY, m_ActivityButton);
-}
 
 // CMainDialogBar message handlers
 
@@ -36,12 +30,26 @@ int CMainDialogBar::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	if (CDialogBar::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	auto pWnd = GetDlgItem(IDC_THREAD_ACTIVITY);
-	m_ActivityButton.Attach(pWnd->GetSafeHwnd());
+	return 0;
+}
+
+void CMainDialogBar::OnSetActivityLevel(UINT id) {
+	m_pView->OnChangeThreadActivity(id);
+}
+
+void CMainDialogBar::OnUpdateSetActivityLevel(CCmdUI* pCmdUI) {
+	m_pView->OnUpdateChangeThreadActivity(pCmdUI);
+}
+
+void CMainDialogBar::InitControls(CChildView* pView) {
+	m_pView = pView;
+
+	// menu button
+
+	auto pButton = (CMFCMenuButton*)GetDlgItem(IDC_THREAD_ACTIVITY);
 	CMenu menu;
 	menu.LoadMenuW(IDR_CONTEXTMENU);
-	m_ActivityButton.m_hMenu = menu.GetSubMenu(0)->GetSafeHmenu();
-
-	return 0;
+	pButton->m_hMenu = menu.GetSubMenu(0)->m_hMenu;
+	menu.Detach();
 }
 

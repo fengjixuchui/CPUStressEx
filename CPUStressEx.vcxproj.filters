@@ -45,9 +45,6 @@
     <ClInclude Include="Globals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MainDialogBar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CPUStressEx.cpp">
@@ -69,9 +66,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Globals.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainDialogBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -96,6 +90,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Icons\gear_run.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Icons\gear_add.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

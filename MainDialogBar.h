@@ -1,5 +1,6 @@
 #pragma once
 
+class CChildView;
 
 // CMainDialogBar
 
@@ -11,10 +12,13 @@ public:
 	CMainDialogBar();
 	virtual ~CMainDialogBar();
 
-	void DoDataExchange(CDataExchange* pDX);
+	void InitControls(CChildView*);
 
 protected:
-	CMFCMenuButton m_ActivityButton;
+	CChildView* m_pView;
+
+	void OnSetActivityLevel(UINT id);
+	void OnUpdateSetActivityLevel(CCmdUI* pCmdUI);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
