@@ -36,6 +36,8 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_UPDATE_COMMAND_UI(ID_PROCESS_CREATETHREAD, &CChildView::OnUpdateProcessCreatethread)
 	ON_COMMAND(ID_PROCESS_CREATE4THREADS, &CChildView::OnProcessCreate4threads)
 	ON_UPDATE_COMMAND_UI(ID_PROCESS_CREATE4THREADS, &CChildView::OnUpdateProcessCreate4threads)
+	ON_COMMAND_RANGE(ID_PRIORITY_IDLE, ID_PRIORITY_TIMECRITICAL, OnChangeThreadPriority)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_PRIORITY_IDLE, ID_PRIORITY_TIMECRITICAL, OnUpdateChangeThreadPriority)
 
 	ON_NOTIFY(NM_RCLICK, IDC_LIST, OnRClickList)
 END_MESSAGE_MAP()
@@ -86,9 +88,9 @@ int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	m_List.InsertColumn(1, L"ID", LVCFMT_LEFT, 60);
 	m_List.InsertColumn(2, L"Active?", LVCFMT_CENTER, 80);
 	m_List.InsertColumn(3, L"Activity", LVCFMT_LEFT, 80);
-	m_List.InsertColumn(4, L"Priority", LVCFMT_LEFT, 80);
+	m_List.InsertColumn(4, L"Priority", LVCFMT_LEFT, 100);
 	m_List.InsertColumn(5, L"Ideal CPU", LVCFMT_LEFT, 80);
-	m_List.InsertColumn(6, L"Affinity", LVCFMT_LEFT, 100);
+	m_List.InsertColumn(6, L"Affinity", LVCFMT_LEFT, 120);
 
 	CreateThreads();
 
@@ -140,7 +142,7 @@ PCWSTR CChildView::ThreadPriorityToString(int priority) {
 	static const PCWSTR Levels[] = {
 		L"Idle", L"Lowest", L"Below Normal", L"Normal", L"Above Normal", L"Highest", L"Time Critical"
 	};
-	return Levels[::abs(priority) == 15 ? priority - 13 * priority / 15 : priority + 3];
+	return Levels[3 + (::abs(priority) == 15 ? priority - 12 * priority / 15 : priority)];
 }
 
 unique_ptr<CThread> CChildView::CreateThread() {
@@ -230,4 +232,22 @@ void CChildView::OnUpdateProcessCreate4threads(CCmdUI *pCmdUI) {
 	pCmdUI->Enable(m_Threads.size() < 60);
 }
 
+void CChildView::OnChangeThreadPriority(UINT id) {
+	for(auto& item : GetSelectedThreads()) {
+		item.first->SetPriority(IndexToPriority(id - ID_PRIORITY_IDLE));
+		UpdateThread(item.second, item.first);
+	}
+}
+void CChildView::OnUpdateChangeThreadPriority(CCmdUI* pCmdUI) {
+	pCmdUI->Enable(m_List.GetFirstSelectedItemPosition() != nullptr);
+}
+
+int CChildView::IndexToPriority(int index) {
+	static int priorities[] = {
+		THREAD_PRIORITY_IDLE, THREAD_PRIORITY_LOWEST, THREAD_PRIORITY_BELOW_NORMAL,
+		THREAD_PRIORITY_NORMAL,
+		THREAD_PRIORITY_ABOVE_NORMAL, THREAD_PRIORITY_HIGHEST, THREAD_PRIORITY_TIME_CRITICAL
+	};
+	return priorities[index];
+}
 

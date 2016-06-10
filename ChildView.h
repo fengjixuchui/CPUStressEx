@@ -46,20 +46,22 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	std::vector<std::pair<CThread*, int>> GetSelectedThreads() const;
 	void UpdateThread(int n, const CThread* thread = nullptr);
-
-	afx_msg void OnCustomDraw(NMHDR*, LRESULT*);
-	afx_msg void OnThreadActivate();
-	afx_msg void OnUpdateThreadActivate(CCmdUI *pCmdUI);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnThreadDeactivate();
-	afx_msg void OnUpdateThreadDeactivate(CCmdUI *pCmdUI);
+	static int IndexToPriority(int index);
+	void OnCustomDraw(NMHDR*, LRESULT*);
+	void OnThreadActivate();
+	void OnUpdateThreadActivate(CCmdUI *pCmdUI);
+	BOOL OnEraseBkgnd(CDC* pDC);
+	void OnThreadDeactivate();
+	void OnUpdateThreadDeactivate(CCmdUI *pCmdUI);
 	void OnRClickList(NMHDR*, LRESULT*);
 
 	void OnChangeThreadActivity(UINT id);
 	void OnUpdateChangeThreadActivity(CCmdUI* pCmdUI);
-	afx_msg void OnProcessCreatethread();
-	afx_msg void OnUpdateProcessCreatethread(CCmdUI *pCmdUI);
-	afx_msg void OnProcessCreate4threads();
-	afx_msg void OnUpdateProcessCreate4threads(CCmdUI *pCmdUI);
+	void OnProcessCreatethread();
+	void OnUpdateProcessCreatethread(CCmdUI *pCmdUI);
+	void OnProcessCreate4threads();
+	void OnUpdateProcessCreate4threads(CCmdUI *pCmdUI);
+	void OnChangeThreadPriority(UINT id);
+	void OnUpdateChangeThreadPriority(CCmdUI* pCmdUI);
 };
 
