@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "CPUStressEx.h"
 #include "ChildView.h"
+#include "AffinityDlg.h"
 
 using namespace std;
 
@@ -40,6 +41,13 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_PRIORITY_IDLE, ID_PRIORITY_TIMECRITICAL, OnUpdateChangeThreadPriority)
 
 	ON_NOTIFY(NM_RCLICK, IDC_LIST, OnRClickList)
+	ON_COMMAND(ID_THREAD_AFFINITY, &CChildView::OnThreadAffinity)
+	ON_UPDATE_COMMAND_UI(ID_THREAD_AFFINITY, OnUpdateChangeThreadPriority)
+
+	ON_COMMAND(ID_THREAD_IDEALCPU, &CChildView::OnThreadIdealcpu)
+	ON_UPDATE_COMMAND_UI(ID_THREAD_IDEALCPU, OnUpdateChangeThreadPriority)
+	ON_COMMAND(ID_THREAD_KILL, &CChildView::OnThreadKill)
+	ON_UPDATE_COMMAND_UI(ID_THREAD_KILL, OnUpdateChangeThreadPriority)
 END_MESSAGE_MAP()
 
 void CChildView::DoDataExchange(CDataExchange* pDX) {
@@ -81,7 +89,8 @@ int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	if(CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	m_List.Create(WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | LVS_REPORT | LVS_SHOWSELALWAYS, CRect(), this, IDC_LIST);
+	m_List.Create(WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER, 
+		CRect(), this, IDC_LIST);
 	m_List.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_AUTOSIZECOLUMNS | LVS_EX_FLATSB);
 
 	m_List.InsertColumn(0, L"#", 0, 40);
@@ -89,8 +98,8 @@ int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	m_List.InsertColumn(2, L"Active?", LVCFMT_CENTER, 80);
 	m_List.InsertColumn(3, L"Activity", LVCFMT_LEFT, 80);
 	m_List.InsertColumn(4, L"Priority", LVCFMT_LEFT, 100);
-	m_List.InsertColumn(5, L"Ideal CPU", LVCFMT_LEFT, 80);
-	m_List.InsertColumn(6, L"Affinity", LVCFMT_LEFT, 120);
+	m_List.InsertColumn(5, L"Ideal CPU", LVCFMT_CENTER, 80);
+	m_List.InsertColumn(6, L"Affinity", LVCFMT_RIGHT, 120);
 
 	CreateThreads();
 
@@ -127,7 +136,7 @@ void CChildView::UpdateThread(int n, const CThread* thread) {
 	str.Format(L"%d", thread->GetIdealCPU());
 	m_List.SetItemText(n, 5, str);
 	WCHAR buffer[65];
-	_itow_s(thread->GetAffinity(), buffer, 2);
+	_ui64tow_s(thread->GetAffinity(), buffer, 65, 2);
 	m_List.SetItemText(n, 6, buffer);
 
 	m_List.SetItemData(n, reinterpret_cast<DWORD_PTR>(thread));
@@ -251,3 +260,47 @@ int CChildView::IndexToPriority(int index) {
 	return priorities[index];
 }
 
+void CChildView::OnThreadAffinity() {
+	auto threads = GetSelectedThreads();
+	CAffinityDlg dlg(true, threads.size() == 1 ? threads[0].first : nullptr, L"Select CPU Affinity");
+	if(dlg.DoModal() == IDOK) {
+		for(auto& item : GetSelectedThreads()) {
+			item.first->SetAfinity(dlg.GetSelectedAffinity());
+			UpdateThread(item.second, item.first);
+		}
+	}
+}
+
+void CChildView::OnThreadIdealcpu() {
+	auto threads = GetSelectedThreads();
+	CAffinityDlg dlg(false, threads.size() == 1 ? threads[0].first : nullptr, L"Select Ideal CPU");
+	if(dlg.DoModal() == IDOK) {
+		for(auto& item : GetSelectedThreads()) {
+			item.first->SetIdealCPU(dlg.GetSelectedCPU());
+			UpdateThread(item.second, item.first);
+		}
+	}
+}
+
+void CChildView::OnThreadKill() {
+	auto threads = GetSelectedThreads();
+	CString text;
+	text.Format(L"Terminate %d thread(s)?", threads.size());
+	if(AfxMessageBox(text, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDNO)
+		return;
+
+	int offset = 0;
+	for(int i = 0; i < threads.size(); i++) {
+		auto& item = threads[i];
+		item.first->Terminate();
+		int index = item.second;
+		m_List.DeleteItem(index - offset);
+		m_Threads.erase(m_Threads.begin() + (index - offset));
+		offset++;
+	}
+	WCHAR buffer[4];
+	for(int i = 0; i < m_List.GetItemCount(); i++) {
+		_itow_s(i + 1, buffer, 10);
+		m_List.SetItemText(i, 0, buffer);
+	}
+}

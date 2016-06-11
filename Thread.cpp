@@ -9,14 +9,18 @@
 // CThread
 
 CThread::CThread() {
-	m_Affinity = (1 << CGlobals::GetProcessorCount()) - 1;
+	int cpus = CGlobals::GetProcessorCount();
+	if(cpus == sizeof(DWORD_PTR) * 8)
+		m_Affinity = (DWORD_PTR)-1;
+	else
+		m_Affinity = (((DWORD_PTR)1) << cpus) - 1;
 	m_hTerminate = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 	m_hThread = ::CreateThread(nullptr, 0, ThreadFunction, this, CREATE_SUSPENDED, &m_ID);
 }
 
 CThread::~CThread() {
-	if (m_hThread)
-		::CloseHandle(m_hThread);
+	::CloseHandle(m_hThread);
+	::CloseHandle(m_hTerminate);
 } 
 
 void CThread::Suspend() {
@@ -38,15 +42,17 @@ DWORD CThread::ThreadFunction(PVOID p) {
 }
 
 DWORD CThread::ThreadFunction() {
+	auto hTerminate = m_hTerminate;
 	for (;;) {
-		if (::WaitForSingleObject(m_hTerminate, 0) == WAIT_OBJECT_0)
+		if (::WaitForSingleObject(hTerminate, 0) == WAIT_OBJECT_0)
 			break;
 		
-		if (m_ActivityLevel != ActivityLevel::Maximum) {
+		auto level = m_ActivityLevel;
+		if (level != ActivityLevel::Maximum) {
 			auto time = ::GetTickCount();
-			while (::GetTickCount() - time < (unsigned)m_ActivityLevel * 25)
+			while (::GetTickCount() - time < (unsigned)level * 25)
 				;
-			::Sleep(100 - (int)m_ActivityLevel * 25);
+			::Sleep(100 - (int)level * 25);
 		}
 	}
 
@@ -72,7 +78,11 @@ int CThread::GetIdealCPU() const {
 }
 
 void CThread::Terminate() {
+	m_ActivityLevel = ActivityLevel::None;
 	::SetEvent(m_hTerminate);
+	Resume();
+	if(::WaitForSingleObject(m_hThread, 500) == WAIT_TIMEOUT)
+		::TerminateThread(m_hThread, 1);
 }
 
 

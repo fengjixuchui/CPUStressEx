@@ -9,9 +9,14 @@
 #define IDI_KILL                        313
 #define IDI_PAUSE                       314
 #define IDR_CONTEXTMENU                 315
-#define IDI_ICON1                       316
 #define IDI_CREATE                      316
+#define IDD_AFFINITY                    317
 #define IDC_THREAD_ACTIVITY             1002
+#define IDC_DUMMY                       1003
+#define IDC_SELECTALL                   1004
+#define IDC_UNSELECTALL                 1005
+#define IDC_PROCESS_AFFINITY            1006
+#define IDC_PRIORITYCLASS               1007
 #define ID_THREAD_ACTIVE                32771
 #define ID_THREAD_ACTIVITYLEVEL         32772
 #define ID_ACTIVITYLEVEL_LOW            32773
@@ -43,15 +48,14 @@
 #define ID_THREAD_ACTIVE32800           32800
 #define ID_PROCESS_CREATETHREAD         32801
 #define ID_PROCESS_CREATE4THREADS       32802
-#define ID_PROCESS_CREATETHREAD2        32802
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        317
+#define _APS_NEXT_RESOURCE_VALUE        319
 #define _APS_NEXT_COMMAND_VALUE         32803
-#define _APS_NEXT_CONTROL_VALUE         1003
+#define _APS_NEXT_CONTROL_VALUE         1008
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

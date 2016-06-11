@@ -63,5 +63,11 @@ protected:
 	void OnUpdateProcessCreate4threads(CCmdUI *pCmdUI);
 	void OnChangeThreadPriority(UINT id);
 	void OnUpdateChangeThreadPriority(CCmdUI* pCmdUI);
+public:
+	afx_msg void OnThreadAffinity();
+	afx_msg void OnThreadIdealcpu();
+//	afx_msg void OnProcessAffinity();
+//	afx_msg void OnUpdateProcessAffinity(CCmdUI *pCmdUI);
+	afx_msg void OnThreadKill();
 };
 

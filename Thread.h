@@ -2,6 +2,7 @@
 #pragma once
 
 enum class ActivityLevel {
+	None = 0,
 	Low = 1,
 	Medium = 2,
 	Busy = 3,
@@ -56,7 +57,7 @@ private:
 	DWORD m_ID;
 	ActivityLevel m_ActivityLevel = ActivityLevel::Low;
 	bool m_Active = false;
-	DWORD m_Affinity;
+	DWORD_PTR m_Affinity;
 };
 
 

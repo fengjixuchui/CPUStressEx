@@ -6,6 +6,7 @@
 #include "CPUStressEx.h"
 
 #include "MainFrm.h"
+#include "AffinityDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,6 +21,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_SETFOCUS()
 	ON_COMMAND(ID_OPTIONS_ALWAYSONTOP, &CMainFrame::OnOptionsAlwaysontop)
 	ON_UPDATE_COMMAND_UI(ID_OPTIONS_ALWAYSONTOP, &CMainFrame::OnUpdateOptionsAlwaysontop)
+	ON_COMMAND(ID_PROCESS_AFFINITY, &CMainFrame::OnProcessAffinity)
+	ON_COMMAND_RANGE(ID_PRIORITYCLASS_IDLE, ID_PRIORITYCLASS_REALTIME, OnChangePriorityClass)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_PRIORITYCLASS_IDLE, ID_PRIORITYCLASS_REALTIME, OnUpdateChangePriorityClass)
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -44,6 +48,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 		TRACE0("Failed to create dialogbar\n");
 		return -1;
 	}
+
+	SetProcessAffinityText();
+	SetProcessPriorityClassText();
 
 	// main icon window
 
@@ -101,4 +108,78 @@ void CMainFrame::OnOptionsAlwaysontop() {
 
 void CMainFrame::OnUpdateOptionsAlwaysontop(CCmdUI *pCmdUI) {
 	pCmdUI->SetCheck((GetExStyle() & WS_EX_TOPMOST) > 0);
+}
+
+
+void CMainFrame::OnProcessAffinity() {
+	CAffinityDlg dlg(L"Set Process Affinity");
+	if(dlg.DoModal() == IDOK) {
+		if(!::SetProcessAffinityMask(::GetCurrentProcess(), dlg.GetSelectedAffinity())) {
+			AfxMessageBox(L"Failed to set process affinity mask");
+			return;
+		}
+		SetProcessAffinityText();
+	}
+}
+
+void CMainFrame::SetProcessAffinityText() {
+	DWORD_PTR processAffinity, systemAffinity;
+	::GetProcessAffinityMask(::GetCurrentProcess(), &processAffinity, &systemAffinity);
+	WCHAR buffer[65];
+	_ui64tow_s(processAffinity, buffer, 65, 2);
+	m_wndDlgBar.GetDlgItem(IDC_PROCESS_AFFINITY)->SetWindowText(CString(L"Process Affinity: ") + buffer);
+}
+
+void CMainFrame::SetProcessPriorityClassText() {
+	int priority = ::GetPriorityClass(::GetCurrentProcess());
+	m_wndDlgBar.GetDlgItem(IDC_PRIORITYCLASS)->SetWindowText(CString(L"Process Priority Class: ") + PriorityClassToString(priority));
+}
+
+PCWSTR CMainFrame::PriorityClassToString(int priority) {
+	switch(priority) {
+	case NORMAL_PRIORITY_CLASS:
+		return L"Normal";
+	case IDLE_PRIORITY_CLASS:
+		return L"Idle";
+	case BELOW_NORMAL_PRIORITY_CLASS:
+		return L"Below Normal";
+	case ABOVE_NORMAL_PRIORITY_CLASS:
+		return L"Above Normal";
+	case HIGH_PRIORITY_CLASS:
+		return L"High";
+	case REALTIME_PRIORITY_CLASS:
+		return L"Realtime";
+	}
+	return nullptr;
+}
+
+void CMainFrame::OnChangePriorityClass(UINT id) {
+	static int priorities[] = {
+		IDLE_PRIORITY_CLASS, BELOW_NORMAL_PRIORITY_CLASS, NORMAL_PRIORITY_CLASS,
+		ABOVE_NORMAL_PRIORITY_CLASS, HIGH_PRIORITY_CLASS, REALTIME_PRIORITY_CLASS
+	};
+	::SetPriorityClass(::GetCurrentProcess(), priorities[id - ID_PRIORITYCLASS_IDLE]);
+	SetProcessPriorityClassText();
+}
+
+void CMainFrame::OnUpdateChangePriorityClass(CCmdUI* pCmdUI) {
+	pCmdUI->SetRadio(pCmdUI->m_nID == PriorityClassToID(::GetPriorityClass(::GetCurrentProcess())));
+}
+
+int CMainFrame::PriorityClassToID(int priority) {
+	switch(priority) {
+	case NORMAL_PRIORITY_CLASS:
+		return ID_PRIORITYCLASS_NORMAL;
+	case IDLE_PRIORITY_CLASS:
+		return ID_PRIORITYCLASS_IDLE;
+	case BELOW_NORMAL_PRIORITY_CLASS:
+		return ID_PRIORITYCLASS_BELOWNORMAL;
+	case ABOVE_NORMAL_PRIORITY_CLASS:
+		return ID_PRIORITYCLASS_ABOVENORMAL;
+	case HIGH_PRIORITY_CLASS:
+		return ID_PRIORITYCLASS_HIGH;
+	case REALTIME_PRIORITY_CLASS:
+		return ID_PRIORITYCLASS_REALTIME;
+	}
+	return 0;
 }
