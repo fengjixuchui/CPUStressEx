@@ -78,7 +78,7 @@ void CChildView::OnRClickList(NMHDR*, LRESULT*) {
 	int item = m_List.HitTest(pt);
 	CMenu menu;
 	menu.LoadMenu(IDR_CONTEXTMENU);
-	menu.GetSubMenu(item < 0 ? 1 : 0)->TrackPopupMenu(TPM_RIGHTBUTTON, screen.x, screen.y, this);
+	menu.GetSubMenu(item < 0 ? 1 : 0)->TrackPopupMenu(TPM_RIGHTBUTTON, screen.x, screen.y, AfxGetMainWnd());
 }
 
 void CChildView::OnPaint() {
@@ -290,7 +290,7 @@ void CChildView::OnThreadKill() {
 		return;
 
 	int offset = 0;
-	for(int i = 0; i < threads.size(); i++) {
+	for(size_t i = 0; i < threads.size(); i++) {
 		auto& item = threads[i];
 		item.first->Terminate();
 		int index = item.second;

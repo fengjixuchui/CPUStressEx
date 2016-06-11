@@ -187,7 +187,7 @@ BEGIN
             MENUITEM "&Realtime",                   ID_PRIORITYCLASS_REALTIME
         END
         MENUITEM SEPARATOR
-        MENUITEM "A&ffinity...",                ID_PROCESS_AFFINITY
+        MENUITEM "Process A&ffinity...",        ID_PROCESS_AFFINITY
         MENUITEM SEPARATOR
         MENUITEM "Create &Thread",              ID_PROCESS_CREATETHREAD
         MENUITEM "Create &4 Threads",           ID_PROCESS_CREATE4THREADS
