@@ -75,14 +75,14 @@ void CChildView::OnRClickList(NMHDR*, LRESULT*) {
 	::GetCursorPos(&pt);
 	CPoint screen(pt);
 	m_List.ScreenToClient(&pt);
-	int item = m_List.HitTest(pt);
+	int item = m_List.HitTest(pt); 
 	CMenu menu;
 	menu.LoadMenu(IDR_CONTEXTMENU);
 	menu.GetSubMenu(item < 0 ? 1 : 0)->TrackPopupMenu(TPM_RIGHTBUTTON, screen.x, screen.y, AfxGetMainWnd());
 }
 
 void CChildView::OnPaint() {
-	CPaintDC dc(this); // device context for painting
+	CPaintDC dc(this); 
 }
 
 int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
